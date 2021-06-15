@@ -10,22 +10,36 @@ Just type in any chat [@ImagesInlineBot](t.me/ImagesInlineBot)
 and you will receive the some images for this query.`);
 });
 
-bot.on('inline_query', async(ctx)=>{
+bot.on("inline_query", async (ctx) => {
     const result = await searchImage(ctx.inlineQuery.query);
     if (!ctx.inlineQuery.query) return;
-    const data = result.data.hits.map((hit) =>{
+    let data = result.data.hits.map((hit) => {
         return {
-            type: 'photo',
-            id: hit.id.toString(),
+            type: "photo",
+            id: hit.id,
             photo_url: hit.largeImageURL,
             thumb_url: hit.previewURL,
             title: hit.tags,
-            description: hit.tags
-        }
+            description: hit.tags,
+            reply_markup: {
+                inline_keyboard: [
+                    [
+                        {
+                            text: `${hit.likes} ❤️`,
+                            url: hit.pageURL,
+                        },
+                    ],
+                    [
+                        {
+                            text: "Share bot with friends",
+                            switch_inline_query: "",
+                        },
+                    ],
+                ],
+            },
+        };
     });
-
-    console.log(data)
-    ctx.answerInlineQuery(data);
-})
+    ctx.answerInlineQuery(JSON.stringify(data));
+});
 
 bot.launch();
